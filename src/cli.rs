@@ -2,7 +2,7 @@ use std::fs::metadata;
 use std::path::{Path, PathBuf};
 
 use crate::AResult;
-use anyhow::{anyhow, Context};
+use anyhow::{anyhow, bail, Context};
 use clap::Parser;
 use clap::{crate_authors, crate_description, crate_name, crate_version};
 use tokio::sync::oneshot;
@@ -70,6 +70,9 @@ impl App {
                 .and_then(|x| x.to_str())
                 .ok_or_else(|| anyhow!("Error while read filename"))?;
                 let path = save_dir.clone().unwrap_or_else(PathBuf::new).join(name);
+                if path.exists() {
+                    bail!("The file is already exists")
+                }
                 for addr in &addrs {
                     debug!("Trying {addr}");
                     if recv_file(
